@@ -1,3 +1,4 @@
+
 from sqlalchemy import inspect
 
 from yacut.models import URLMap
