@@ -1,12 +1,11 @@
 from flask import flash, redirect, render_template, url_for
 
 from . import app, db
+from .constants import URL_HOST, SHORT_PREFIX
 from .forms import FileForm, LinkForm
 from .models import URLMap
 from .utils import get_unique_short_id, async_upload_files_to_ya_disk
 
-URL_HOST = 'http://127.0.0.1:5000/'
-SHORT_PREFIX = 'short/'
 
 @app.route('/', methods=['GET', 'POST'])
 def generate_short_link_view():
@@ -45,7 +44,7 @@ async def add_files_view():
     if form.validate_on_submit():
         urls = await async_upload_files_to_ya_disk(form.files.data)
         links = [
-            URLMap(original=url[0], short=url[1])
+            URLMap(original=url['original_link'], short=url['short_id'])
             for url in urls
         ]
         db.session.add_all(links)
@@ -54,3 +53,10 @@ async def add_files_view():
             url_for('add_files.html', links=links),
         )
     return render_template('add_files.html', form=form)
+
+
+@app.route('/short/<string:short_id>/', methods=['GET', 'POST'])
+async def redirect_to_original_link_view(short_id):
+    """Принимает короткую ссылку и перенаправляет на оригинальную."""
+    original_link = URLMap.query.get_or_404(short=short_id)
+    return redirect(original_link)
