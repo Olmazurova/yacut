@@ -43,6 +43,7 @@ async def add_files_view():
     form = FileForm()
     if form.validate_on_submit():
         urls = await async_upload_files_to_ya_disk(form.files.data)
+        print(form.files.data, type(form.files.data))
         links = [
             URLMap(original=url['original_link'], short=url['short_id'])
             for url in urls

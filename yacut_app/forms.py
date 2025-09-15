@@ -8,11 +8,11 @@ class LinkForm(FlaskForm):
     """Форма для создания короткой ссылки."""
 
     original_link = URLField(
-        'Введите ссылку, которую нужно сократить',
+        'Длинная ссылка',
         validators=[DataRequired(message='Обязательное поле')]
     )
     custom_id = URLField(
-        'Введите короткую ссылку, которую хотите установить',
+        'Ваш вариант короткой ссылки',
         validators=[Length(1, 16), Optional()]
     )
     submit = SubmitField('Создать')
