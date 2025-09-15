@@ -3,16 +3,17 @@ from http import HTTPStatus
 from flask import jsonify, request
 
 from . import app, db
+from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 from .utils import get_unique_short_id
+
 
 @app.route('/api/id', methods=['POST'])
 def generate_short_link():
     """Генерирует короткую ссылку взамен отправленной."""
     data = request.get_json()
     if 'url' not in data:
-        return (jsonify({"message": "Отсутствует тело запроса"}),
-                HTTPStatus.BAD_REQUEST)
+        raise InvalidAPIUsage('Отсутствует тело запроса')
     link = URLMap.query.filter_by(original=data['url']).first()
     if link is not None:
         return jsonify(link.to_dict()), HTTPStatus.OK
@@ -29,6 +30,6 @@ def get_original_link(short_id):
     link = URLMap.query.filter_by(short=short_id).first()
     if link is not None:
         return jsonify({'url': link.original}), HTTPStatus.OK
-    return jsonify({
-  "message": "Указанный id не найден"
-}), HTTPStatus.NOT_FOUND
+    raise InvalidAPIUsage(
+        'Указанный id не найден', HTTPStatus.NOT_FOUND
+    )
