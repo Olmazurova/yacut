@@ -22,7 +22,7 @@
                         {% endfor %}
                       </p>
                   {% endif %}
-                {{ form.submit(class="button px-5 py-3 btn") }}
+                {{ form.submit(class="btn btn-primary") }}
             </form>
           </div>
           <div class="col-sm">
@@ -41,6 +41,7 @@
             <h5 class="text-center">{{ link.original }}</h5>
               <a href="{{ link.short }}">{{ link.short }}</a>
             </p>
+              {% endfor %}
           </div>
           <div class="col-sm">
           </div>

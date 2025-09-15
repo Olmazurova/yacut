@@ -12,4 +12,4 @@ API_HOST = 'https://cloud-api.yandex.net/'
 API_VERSION = 'v1'
 REQUEST_UPLOAD_URL = f'{API_HOST}{API_VERSION}/disk/resources/upload'
 DOWNLOAD_LINK_URL = f'{API_HOST}{API_VERSION}/disk/resources/download'
-AUTH_HEADERS = {'Authorization': f'OAuth {app.config.DISK_TOKEN}'}
+AUTH_HEADERS = {'Authorization': f'OAuth {app.config['DISK_TOKEN']}'}
