@@ -22,9 +22,12 @@ class FileForm(FlaskForm):
     """Форма для загрузки файлов на Яндекс Диск и получения ссылки на них."""
 
     files = MultipleFileField(
-        validators=[FileSize(
-            20_000_000,
-            message='Размер файла не может быть больше 20 Mb.'
-        )],
+        validators=[
+            DataRequired(message='Обязательное поле'),
+            FileSize(
+                20_000_000,
+                message='Размер файла не может быть больше 20 Mb.'
+            ),
+        ],
     )
     submit = SubmitField('Загрузить')

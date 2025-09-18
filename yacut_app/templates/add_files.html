@@ -29,17 +29,16 @@
           </div>
         </div>
       </div>
-        {% if links %}
+        {% if files|length > 0 %}
       <div class="container">
         <div class="row ">
           <div class="col-sm">
           </div>
           <div class="col-sm">
-              {% for link in links %}
+              {% for file in files %}
 
             <p class="text-center">
-            <h5 class="text-center">{{ link.original }}</h5>
-              <a href="{{ link.short }}">{{ link.short }}</a>
+            {{ file[0] }}  <a href="{{ file[1] }}">{{ file[1] }}</a>
             </p>
               {% endfor %}
           </div>

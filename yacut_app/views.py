@@ -1,3 +1,5 @@
+import urllib.parse
+
 from flask import flash, redirect, render_template, url_for
 
 from . import app, db
@@ -13,11 +15,14 @@ def generate_short_link_view():
     form = LinkForm()
     if form.validate_on_submit():
         short_id = form.custom_id.data
-        short_id_list = URLMap.query.with_entities(URLMap.short).all()
-        if short_id in short_id_list.append('files'):
+        print('Short', short_id)
+        short_id_list = ['files'] + URLMap.query.with_entities(
+            URLMap.short
+        ).all()
+        if short_id in short_id_list:
             flash('Предложенный вариант короткой ссылки уже существует.')
             return render_template('get_link.html', form=form)
-        if short_id is None:
+        if short_id == '':
             short_id = get_unique_short_id()
             while short_id in short_id_list:
                 short_id = get_unique_short_id()
@@ -28,8 +33,9 @@ def generate_short_link_view():
         db.session.add(link)
         db.session.commit()
         short_link = f'{URL_HOST}{SHORT_PREFIX}{link.short}'
-        return redirect(
-            url_for('get_link.html', short_link=short_link),
+        print('short_link', short_link)
+        return render_template(
+            'get_link.html', form=form, short_link=short_link
         )
     return render_template('get_link.html', form=form)
 
@@ -50,14 +56,22 @@ async def add_files_view():
         ]
         db.session.add_all(links)
         db.session.commit()
-        return redirect(
-            url_for('add_files.html', links=links),
+        files = []
+        for link in links:
+            parsed_url = urllib.parse.urlparse(link.original)
+            params = urllib.parse.parse_qs(parsed_url.query)
+            filename_encoded = params.get('filename', [None])[0]  # Обработать ошибку если нет ключа
+            files.append(
+                (filename_encoded, f'{URL_HOST}{SHORT_PREFIX}{link.short}')
+            )
+        return render_template(
+            'add_files.html', form=form, files=files
         )
     return render_template('add_files.html', form=form)
 
 
 @app.route('/short/<string:short_id>/', methods=['GET', 'POST'])
-async def redirect_to_original_link_view(short_id):
+def redirect_to_original_link_view(short_id):
     """Принимает короткую ссылку и перенаправляет на оригинальную."""
-    original_link = URLMap.query.get_or_404(short=short_id)
-    return redirect(original_link)
+    original_link = URLMap.query.filter_by(short=short_id).first_or_404()
+    return redirect(original_link.original)  # почему при загрузке на яндекс диск не даёт доступ к файлам по ссылке? ошибка 403

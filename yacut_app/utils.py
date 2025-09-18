@@ -20,40 +20,41 @@ def get_unique_short_id():
     return short_id
 
 
-async def get_temporary_link(file_name):
+async def get_temporary_link(session, file_name):
     """Получает от Яндекс Диска временную ссылку для загрузки файла."""
     payload = {
         'path': f'app:/{file_name}',
         'overwrite': 'True'
     }
-    response = await aiohttp.get(
+    response = await session.get(
         headers=AUTH_HEADERS,
         params=payload,
         url=REQUEST_UPLOAD_URL
     )
-    return response.json()['href']
+    json_response = await response.json()
+    return json_response['href']
 
 
-async def upload_file_and_get_url(session, file_name):
+async def upload_file_and_get_url(session, file):
     """Загружает файлы на Яндекс Диск и получает на них ссылки."""
-    upload_url = await get_temporary_link(file_name)
-    async with open(file_name, 'rb') as file:
-        response = session.put(
-            data=file,
-            url=upload_url,
-        )
+    upload_url = await get_temporary_link(session, file.filename)
+    file_data = file.read()
+    async with session.put(
+        data=file_data,
+        url=upload_url,
+    ) as response:
+        location = response.headers['Location']
+        location = urllib.parse.unquote(location)
 
-    location = response.headers['Location']
-    location = urllib.parse.unquote(location)
+        location = location.replace('/disk', '')
 
-    location = location.replace('/disk', '')
-
-    response = session.get(
+    async with session.get(
         headers=AUTH_HEADERS,
         url=DOWNLOAD_LINK_URL,
         params={'path': location}
-    )
-    original_link = response.json()['href']
+    ) as response:
+        json_response = await response.json()
+        original_link = json_response['href']
     short_id = get_unique_short_id()
     return {'original_link': original_link, 'short_id': short_id}
 
