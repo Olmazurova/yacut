@@ -10,14 +10,31 @@ from .constants import (AUTH_HEADERS, CHARS, DOWNLOAD_LINK_URL,
                         URL_HOST)
 from .models import URLMap
 
+def get_short_id_list():
+    short_id_list = [short[0]
+                     for short
+                     in URLMap.query.with_entities(URLMap.short).all()]
+    short_id_list.append('files')
+    return short_id_list
+
 
 def get_unique_short_id():
     """Формирует короткий индикатор для ссылки."""
-    short_id_list = URLMap.query.with_entities(URLMap.short).all()
+    short_id_list = get_short_id_list()
     short_id = ''.join(choices(CHARS, k=LENGTH_SHORT_ID))
     while short_id in short_id_list:
         short_id = ''.join(choices(CHARS, k=LENGTH_SHORT_ID))
     return short_id
+
+
+def validate_custom_id(custom_id):
+    """Проверяет, что короткая ссылка пользователя удовлетворяет условиям."""
+    print(len(custom_id))
+    if len(custom_id) not in range(1, 17):
+        return False
+    if set(custom_id) - set(CHARS):
+        return False
+    return True
 
 
 async def get_temporary_link(session, file_name):

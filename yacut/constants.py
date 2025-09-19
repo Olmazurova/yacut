@@ -5,7 +5,7 @@ from . import app
 CHARS = list(ascii_letters + digits)
 LENGTH_SHORT_ID = 6
 
-URL_HOST = 'http://127.0.0.1:5000/'
+URL_HOST = 'http://localhost/'
 SHORT_PREFIX = 'short/'
 
 API_HOST = 'https://cloud-api.yandex.net/'
